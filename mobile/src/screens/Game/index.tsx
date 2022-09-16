@@ -27,7 +27,7 @@ export function Game() {
   }
 
   useEffect(() => {
-    fetch(`http://192.168.0.182:3333/games/${game.id}/ads`)
+    fetch(`http://10.139.75.147:3333/games/${game.id}/ads`)
       .then(response => response.json())
       .then(data => setDuos(data))
   }, []);
@@ -66,7 +66,7 @@ export function Game() {
         <FlatList 
           data={duos}
           keyExtractor={item => item.id}
-          renderItem={({ item }) => (
+          renderItem={({ item }) =>  (
             <DuoCard 
               data={item} 
               onConnect={() => {}}
@@ -79,7 +79,7 @@ export function Game() {
           ListEmptyComponent={() => (
             <Text style={styles.emptyListText}>
               Não há anúncios publicados ainda.
-            </Text>
+            </Text>  
           )}
         />
       </SafeAreaView>
