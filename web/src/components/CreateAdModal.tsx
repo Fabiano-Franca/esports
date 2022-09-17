@@ -6,6 +6,7 @@ import * as ToggleGroup from '@radix-ui/react-toggle-group';
 
 import { Input } from './Form/Input';
 import { FormEvent, useEffect, useState } from 'react';
+import axios from 'axios';
 
 interface Game {
   id: string;
@@ -19,23 +20,35 @@ export function CreateAdModal(){
   const [useVoiceChannel, setUseVoiceChannel] = useState(false);
 
   useEffect(() => {
-    fetch('http://localhost:3333/games')
-      .then(response => response.json())
-      .then(data => {
-        setGames(data)
+    axios('http://localhost:3333/games').then(response => {
+        setGames(response.data)
       })
   }, []);
 
-  function handleCreateAd(event: FormEvent){
+  async function handleCreateAd(event: FormEvent){
     event.preventDefault();
 
     const formData = new FormData(event.target as HTMLFormElement);
 
     const data = Object.fromEntries(formData)
 
-    console.log(data)
-    console.log(weekDays)
-    console.log(useVoiceChannel)
+    try {
+      await axios.post(`http://localhost:3333/games/${data.game}/ads`, {
+        "name": data.name,
+        "yearsPlaying": Number(data.yearsPlaying),
+        "discord": data.discord,
+        "weekDays": weekDays.map(Number),
+        "hourStart": data.hourStart,
+        "hourEnd": data.hourEnd,
+        "useVoiceChannel": useVoiceChannel
+      });
+
+      alert('Anúncio criado com sucesso!')
+
+    } catch (error) {
+      console.log(error);
+      alert('Erro ao criar o anúncio!')
+    }
   }
 
   return(
@@ -49,12 +62,12 @@ export function CreateAdModal(){
             <div className="flex flex-col gap-2">
               <label htmlFor="game">Qual o game?</label>
               <select 
+                defaultValue=""
                 id="game" 
                 name="game"
                 className="bg-zinc-900 py-3 px-4 rounded text-sm placeholder:text-zinc-500 appearance-none" 
-                defaultValue=''
               >
-                <option disabled selected value="">Selecione o jogo que deseja jogar.</option>
+                <option disabled value="">Selecione o jogo que deseja jogar.</option>
 
                 {games.map( game => {
                   return <option key={game.id} value={game.id}>{game.title}</option>
@@ -65,7 +78,7 @@ export function CreateAdModal(){
 
             <div className="flex flex-col gap-2">
               <label htmlFor="name">Seu nome (ou nickname)</label>
-              <Input id="name" name="game" placeholder="Como te chamam dentro do game?" />
+              <Input id="name" name="name" placeholder="Como te chamam dentro do game?" />
             </div>
 
             <div className="grid grid-cols-2 gap-6">
@@ -179,7 +192,7 @@ export function CreateAdModal(){
                 Cancelar
               </Dialog.Close>
               <button 
-                type="button"
+                type="submit"
                 className="bg-violet-500 px-5 h-12 rounded-md font-semibold flex items-center gap-3 hover:bg-violet-600"
               >
                 <GameController className="w-6 h-6"/>
